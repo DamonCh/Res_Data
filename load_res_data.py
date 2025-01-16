@@ -57,7 +57,7 @@ def calc_ann_indicator(pnl):
     tot_ann_ret = ((1+pnl[p_col]).prod())** (251/pnl.shape[0])-1
     tot_ann_sp = tot_ann_ret / (pnl[p_col].std()* (251**0.5))
     ann_indicator.loc["total", :] = [tot_ann_ret, tot_ann_sp]
-    return ann_indicator
+    return ann_indicator.round(3)
 
 
 if __name__ == "__main__":
@@ -78,3 +78,8 @@ if __name__ == "__main__":
     # 多头组合超额年化收益率和夏普比率
     in_excess_ann_indicator = calc_ann_indicator(excess_ret_df.loc[excess_ret_df.Date<"20230101"])
     out_excess_ann_indicator = calc_ann_indicator(excess_ret_df.loc[excess_ret_df.Date>="20230101"])
+    print(f"样本内：多头：\n{in_ann_indicator} \n" 
+          f"超额：\n {in_excess_ann_indicator} \n",
+            f"样本外：多头 \n {out_ann_indicator} \n",
+            f"超额：\n {out_excess_ann_indicator} \n")
+          
