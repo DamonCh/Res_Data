@@ -31,6 +31,24 @@ def load_res_data(fp: Path, file_type: str = "parquet"):
     t_res = res_df.loc[res_df.basket == t_basket, ["Date", "pnl"]].reset_index(drop=True)
     return t_res
 
+def calc_max_drawdown(pnl, p_col="pnl"):
+    """
+    Calculate max drawdown.
+    #
+    Parameters
+    ----------
+    pnl: pd.DataFrame
+        Pnl series.
+    Returns
+    -------
+    pd.DataFrame
+    """
+    pnl.loc[:, "cum_ret"] = (1+pnl[p_col]).cumprod()
+    pnl.loc[:, "cum_max"] = pnl.cum_ret.cummax()
+    pnl.loc[:, "drawdown"] = pnl.cum_max - pnl.cum_ret
+    pnl.loc[:, "drawdown_pct"] = pnl.drawdown / pnl.cum_max
+    max_drawdown = pnl.drawdown_pct.max()
+    return max_drawdown
 
 def calc_ann_indicator(pnl):
     """
@@ -53,10 +71,14 @@ def calc_ann_indicator(pnl):
     ann_vol = pnl.groupby("yr").apply(lambda x: x[p_col].std()* (251**0.5))
     ann_sp = ann_ret.div(ann_vol)
     ann_sp.name = "ann_sp"
-    ann_indicator = pd.concat([ann_ret, ann_sp], axis=1)
+    # 计算max_drowdown
+    mdd = pnl.groupby("yr").apply(calc_max_drawdown, p_col=p_col)
+    mdd.name = "mdd"
+    ann_indicator = pd.concat([ann_ret, ann_sp, mdd], axis=1)
     tot_ann_ret = ((1+pnl[p_col]).prod())** (251/pnl.shape[0])-1
     tot_ann_sp = tot_ann_ret / (pnl[p_col].std()* (251**0.5))
-    ann_indicator.loc["total", :] = [tot_ann_ret, tot_ann_sp]
+    tot_mdd = calc_max_drawdown(pnl, p_col=p_col)
+    ann_indicator.loc["total", :] = [tot_ann_ret, tot_ann_sp, tot_mdd]
     return ann_indicator.round(3)
 
 
