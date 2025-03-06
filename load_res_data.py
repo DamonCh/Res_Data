@@ -84,7 +84,7 @@ def calc_ann_indicator(pnl):
 
 if __name__ == "__main__":
     # path
-    pnl_fp = "./backtest_result/fp0020_NA50_CMBevenNap_T1SP10_FctCor60MPNLCor_pos_G10_month_split/pnl"
+    pnl_fp = "./backtest_result/fp0020_NA50_CMBevenNap_T1SP10_FctCor60MPNLCor_pos_G10_week_split/pnl"
     fp = Path(pnl_fp)
     index_pnl_fp = "./zz1000_pnl.parquet"
     # load pnl data
